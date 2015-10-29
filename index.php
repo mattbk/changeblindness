@@ -80,17 +80,17 @@ switch ($mode) {
         $query->bind_param(
             'siiiiiiiii',
             $_SERVER['REMOTE_ADDR'],
-            $_SESSION['results']['notable']['xcoordinate'],
-            $_SESSION['results']['notable']['ycoordinate'],
-            $_SESSION['results']['notable']['responsetime'],
-            $_SESSION['results']['unnoted']['xcoordinate'],
-            $_SESSION['results']['unnoted']['ycoordinate'],
-            $_SESSION['results']['unnoted']['responsetime'],
-            $_SESSION['results']['renoted']['xcoordinate'],
-            $_SESSION['results']['renoted']['ycoordinate'],
-            $_SESSION['results']['renoted']['responsetime']
+            $_SESSION['results']['scene1']['xcoordinate'],
+            $_SESSION['results']['scene1']['ycoordinate'],
+            $_SESSION['results']['scene1']['responsetime'],
+            $_SESSION['results']['scene2']['xcoordinate'],
+            $_SESSION['results']['scene2']['ycoordinate'],
+            $_SESSION['results']['scene2']['responsetime'],
+            $_SESSION['results']['scene3']['xcoordinate'],
+            $_SESSION['results']['scene3']['ycoordinate'],
+            $_SESSION['results']['scene3']['responsetime']
         ) or die('Could not prepare query');
-        $query->execute() or die('Could not execute query');
+        $query->execute() or die('Could not execute query:<br>'.mysqli_error($db));
         $query->close();
         break;
     case 'results':
@@ -142,7 +142,7 @@ switch ($mode) {
             }
             $variables['data'][] = $data;
 
-            // Build statistics
+            // Build statisticsmat
             foreach ($settings->phases as $phase) {
                 $stats[$phase] = array(
                     'correct' => (($data[$phase]['xcoordinate'] >= $settings->elementLocations->{$phase}->topleft->x)
