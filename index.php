@@ -23,6 +23,8 @@ $db = new mysqli($settings->database->host, $settings->database->username, $sett
 
 $twig_loader = new Twig_Loader_Filesystem($base_dir.'/views');
 $twig = new Twig_Environment($twig_loader, array('debug' => true));
+//Need this to use dump() for debugging.
+$twig->addExtension(new Twig_Extension_Debug());
 
 $variables = array(
     'baseURL' => $settings->baseURL

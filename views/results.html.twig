@@ -26,15 +26,18 @@
             {% for record in stats %}
             <tr>
                 <td>{{ loop.index }}.</td>
-                {% if record.notable.correct %}<td class="alert-success"><i class="icon-ok"></i>{% else %}<td class="alert-danger"><i class="icon-remove"></i>{% endif %}&nbsp;{{ record.notable.time / 1000 }} seconds</td>
+                {% if record.scene1.correct %}<td class="alert-success"><i class="icon-ok"></i>{% else %}<td class="alert-danger"><i class="icon-remove"></i>{% endif %}&nbsp;{{ record.notable.time / 1000 }} seconds</td>
                 {% if record.unnoted.correct %}<td class="alert-success"><i class="icon-ok"></i>{% else %}<td class="alert-danger"><i class="icon-remove"></i>{% endif %}&nbsp;{{ record.unnoted.time / 1000 }} seconds</td>
                 {% if record.renoted.correct %}<td class="alert-success"><i class="icon-ok"></i>{% else %}<td class="alert-danger"><i class="icon-remove"></i>{% endif %}&nbsp;{{ record.renoted.time / 1000 }} seconds</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-
-    <h2 id="raw-results">Raw results</h2>
+<!--Doing some debugging.-->	
+<pre>{{ dump(stats) }}</pre>
+<pre>{{ dump(data) }}</pre>
+    
+	<h2 id="raw-results">Raw results</h2>
     <p><a class="btn" href="results/download"><i class="icon-download-alt"></i> Download results</a></p>
     <table class="table table-striped">
         <thead>
