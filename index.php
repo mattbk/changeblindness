@@ -48,7 +48,7 @@ if (!empty($phase) && isset($_POST['responsetime'])) {
     // End of the line.
     if ($index == count($settings->phases)) {
         header('HTTP/1.0 302 Found');
-        header('Location: http://vcd.sparse.nl/finish');
+        header('Location: index.php?mode=finish');
         exit;
     }
     // Next phase.
