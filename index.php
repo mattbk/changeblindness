@@ -142,7 +142,7 @@ switch ($mode) {
             }
             $variables['data'][] = $data;
 
-            // Build statisticsmat
+            // Build statistics
             foreach ($settings->phases as $phase) {
                 $stats[$phase] = array(
                     'correct' => (($data[$phase]['xcoordinate'] >= $settings->elementLocations->{$phase}->topleft->x)
