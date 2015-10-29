@@ -60,6 +60,7 @@ if (!empty($phase) && isset($_POST['responsetime'])) {
 switch ($mode) {
     case 'start':
         $template = 'index.html.twig';
+        $variables['start_url'] = 'index.php?mode=phase&phase='.$settings->phases[$index];
         break;
     case 'phase':
         $template = 'change.html.twig';
@@ -69,7 +70,7 @@ switch ($mode) {
         break;
     case 'phase_next':
         $template = 'next.html.twig';
-        $variables['next_url'] = 'phase/'.$settings->phases[$index];
+        $variables['next_url'] = 'index.php?mode=phase&phase='.$settings->phases[$index];
         $variables['step_count'] = $index;
         break;
     case 'finish':
@@ -162,5 +163,5 @@ if (!empty ($template)) {
     echo $twig->render($template, $variables);
 }
 else {
-    header('HTTP/1.0 404 Not Found');
+    //header('HTTP/1.0 404 Not Found');
 }
