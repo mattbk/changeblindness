@@ -98,12 +98,37 @@ switch ($mode) {
 
 		//Loop through $results better
 		//This is not done yet, but shows an example of a loop you could put a query statement in.
-		foreach ($_SESSION['results'] as $name => $value) {
-			foreach ($value as $n2 => $v2) {
-				echo $name.$n2.$v2;
+		//I think this will allow running only one query rather than several: http://stackoverflow.com/a/10054657/2152245
+		//However, if you want to define the number of phases/scenes in settings.json only (and not in a db setup script),
+		//	you have to use an EVA table here with fields like userid, phase, measure [xccordinate, ycoordinate, or responsetime], value [value for measure] at minimum.
+		//	then need to rewrite the query to pull them out of the db correctly, since each userid will have one row per measure per phase.
+		foreach ($_SESSION['results'] as $phasename => $phasevalue) {
+			foreach ($phasevalue as $measure => $measurevalue) {
+				//Building an INSERT query:
+				//Include userid (once collection form is added into the start page)
+				//Include a timestamp that actually works
+				
+				//Test output on the screen
+				//echo ""."".$_SERVER['REMOTE_ADDR'].$phasename.$measure.$measurevalue."<br>";		
+				
+				// DB fields: uid, date, host, phase, measure, value
+				// http://php.net/manual/en/function.implode.php
+				$columnstoimplode = array("uid", "datetime", "host", "phase", "measure", "value");
+				// Note that backticks (`) go around field names...
+				$columns = "`".implode("`, `", $columnstoimplode)."`";
+				//print_r($columns);
+				$valuestoimplode = array("", "unix_timestamp()", $_SERVER['REMOTE_ADDR'], $phasename, $measure, $measurevalue);
+				$values  = "'".implode("', '", $valuestoimplode)."'";
+				//print_r($values);
+				// Build and execute query 
+				$sql = "INSERT INTO results (";
+				$sql .= $columns;
+				$sql .= ") VALUES ($values)";
+				$db->query($sql) or die('Could not execute query:<br>'.mysqli_error($db));
 				}
 			}
-
+			
+			
 		//Debugging I think?
         $variables['debug'] = $_SESSION['results']; 
 
