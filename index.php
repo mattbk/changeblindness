@@ -100,38 +100,35 @@ switch ($mode) {
 		//Store the result.
 		//Loop through $results better
 		//This will allow running only one query rather than several: http://stackoverflow.com/a/10054657/2152245
-		//However, if you want to define the number of phases/scenes in settings.json only (and not in a db setup script),
-		//	you have to use an EAV table here with fields like userid, phase, measure [xccordinate, ycoordinate, or responsetime], value [value for measure] at minimum.
-		//	then need to rewrite the query to pull them out of the db correctly, since each userid will have one row per measure per phase.
-		//Criticism of EAV: https://www.simple-talk.com/sql/database-administration/five-simple--database-design-errors-you-should-avoid/,
-		//
-		//Below needs to be rewritten; because I have `phase` as a field, I can also have `xcoordinate`, `ycoordinate`, and `responsetime`
+		//Because I have `phase` as a field, I can also have `xcoordinate`, `ycoordinate`, and `responsetime`
 		//	as values as well.  Table should have a  field list of: uid, datetime, host, userid, phase, xcoordinate, ycoordinate, responsetime.
-		//	SELECT query should then return one row per userid per phase/scene.
+		//	SELECT query should then return one row per userid per phase/scene.	
 		foreach ($_SESSION['results'] as $phasename => $phasevalue) {
+			$ready = array();
+			$ready[] = $phasename;
 			foreach ($phasevalue as $measure => $measurevalue) {
-				//Building an INSERT query:
-				//Include userid (once collection form is added into the start page)
-				//Include a timestamp that actually works
+				//Put results in the right order for database
+				array_push($ready, $measurevalue);
+				}	
+		//Building an INSERT query:
+		//Include userid (once collection form is added into the start page)				
+		// DB fields: uid, date, host, phase, measure, value
+		// http://php.net/manual/en/function.implode.php
+		$columnstoimplode = array("uid", "datetime", "host", "phase", "xcoordinate", "ycoordinate","responsetime");
+		// Note that backticks (`) go around field names...
+		$columns = "`".implode("`, `", $columnstoimplode)."`";
+		// Set up timestamp so you can tell participants apart.  http://alvinalexander.com/php/php-date-formatted-sql-timestamp-insert
+		$timestamp = date('Y-m-d G:i:s');
+		$valuestoimplode = array("", $timestamp, $_SERVER['REMOTE_ADDR']);
+		$valuestoimplode = array_merge($valuestoimplode,$ready);
+		$values  = "'".implode("', '", $valuestoimplode)."'";
+		print_r($values);
+		// Build and execute query 
+		$sql = "INSERT INTO results (";
+		$sql .= $columns;
+		$sql .= ") VALUES ($values)";
+		$db->query($sql) or die('Could not execute query:<br>'.mysqli_error($db));	
 				
-				//Test output on the screen
-				//echo ""."".$_SERVER['REMOTE_ADDR'].$phasename.$measure.$measurevalue."<br>";		
-				
-				// DB fields: uid, date, host, phase, measure, value
-				// http://php.net/manual/en/function.implode.php
-				$columnstoimplode = array("uid", "datetime", "host", "phase", "measure", "value");
-				// Note that backticks (`) go around field names...
-				$columns = "`".implode("`, `", $columnstoimplode)."`";
-				// Set up timestamp so you can tell participants apart.  http://alvinalexander.com/php/php-date-formatted-sql-timestamp-insert
-				$timestamp = date('Y-m-d G:i:s');
-				$valuestoimplode = array("", $timestamp, $_SERVER['REMOTE_ADDR'], $phasename, $measure, $measurevalue);
-				$values  = "'".implode("', '", $valuestoimplode)."'";
-				// Build and execute query 
-				$sql = "INSERT INTO results (";
-				$sql .= $columns;
-				$sql .= ") VALUES ($values)";
-				$db->query($sql) or die('Could not execute query:<br>'.mysqli_error($db));
-				}
 			}
 
 		//Debugging
