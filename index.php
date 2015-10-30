@@ -78,6 +78,7 @@ switch ($mode) {
     case 'finish':
         $template = 'finish.html.twig';
         // Store the result.
+// This section will be removed		
         $query = $db->prepare('insert into vcd_results values (null, unix_timestamp(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
         $query->bind_param(
             'siiiiiiiii',
@@ -94,14 +95,19 @@ switch ($mode) {
         ) or die('Could not prepare query');
         $query->execute() or die('Could not execute query:<br>'.mysqli_error($db));
         $query->close();
-        
-
+ // End remove section
+ 
+		//Store the result.
 		//Loop through $results better
-		//This is not done yet, but shows an example of a loop you could put a query statement in.
-		//I think this will allow running only one query rather than several: http://stackoverflow.com/a/10054657/2152245
+		//This will allow running only one query rather than several: http://stackoverflow.com/a/10054657/2152245
 		//However, if you want to define the number of phases/scenes in settings.json only (and not in a db setup script),
-		//	you have to use an EVA table here with fields like userid, phase, measure [xccordinate, ycoordinate, or responsetime], value [value for measure] at minimum.
+		//	you have to use an EAV table here with fields like userid, phase, measure [xccordinate, ycoordinate, or responsetime], value [value for measure] at minimum.
 		//	then need to rewrite the query to pull them out of the db correctly, since each userid will have one row per measure per phase.
+		//Criticism of EAV: https://www.simple-talk.com/sql/database-administration/five-simple--database-design-errors-you-should-avoid/,
+		//
+		//Below needs to be rewritten; because I have `phase` as a field, I can also have `xcoordinate`, `ycoordinate`, and `responsetime`
+		//	as values as well.  Table should have a  field list of: uid, datetime, host, userid, phase, xcoordinate, ycoordinate, responsetime.
+		//	SELECT query should then return one row per userid per phase/scene.
 		foreach ($_SESSION['results'] as $phasename => $phasevalue) {
 			foreach ($phasevalue as $measure => $measurevalue) {
 				//Building an INSERT query:
@@ -127,12 +133,9 @@ switch ($mode) {
 				$db->query($sql) or die('Could not execute query:<br>'.mysqli_error($db));
 				}
 			}
-			
-			
-		//Debugging I think?
-        $variables['debug'] = $_SESSION['results']; 
 
-		
+		//Debugging
+        $variables['debug'] = $_SESSION['results']; 
         
         break;
     case 'results':
@@ -155,11 +158,15 @@ switch ($mode) {
             $template = 'results.html.twig';
         }
 
+		// Only shows up when debug=true in settings.json.
         if ($filtered) {
             $variables['filtered'] = true;
             $results = $db->query("select * from vcd_results where result_host != '192.168.0.1' order by result_date asc");
         }
+
         else {
+//This query needs to be rewritten to use the results table (EAV version), 
+//	but hopefully format the data in the same way (in the query itself, if possible?)	
             $results = $db->query("select * from vcd_results order by result_date asc");
         }
 
