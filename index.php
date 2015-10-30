@@ -95,9 +95,19 @@ switch ($mode) {
         $query->execute() or die('Could not execute query:<br>'.mysqli_error($db));
         $query->close();
         
-        //Debugging I think?
+
+		//Loop through $results better
+		//This is not done yet, but shows an example of a loop you could put a query statement in.
+		foreach ($_SESSION['results'] as $name => $value) {
+			foreach ($value as $n2 => $v2) {
+				echo $name.$n2.$v2;
+				}
+			}
+
+		//Debugging I think?
         $variables['debug'] = $_SESSION['results']; 
-            
+
+		
         
         break;
     case 'results':
