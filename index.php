@@ -94,6 +94,11 @@ switch ($mode) {
         ) or die('Could not prepare query');
         $query->execute() or die('Could not execute query:<br>'.mysqli_error($db));
         $query->close();
+        
+        //Debugging I think?
+        $variables['debug'] = $_SESSION['results']; 
+            
+        
         break;
     case 'results':
         $download = isset($_GET['download']);
@@ -165,5 +170,5 @@ if (!empty ($template)) {
     echo $twig->render($template, $variables);
 }
 else {
-    //header('HTTP/1.0 404 Not Found');
+    header('HTTP/1.0 404 Not Found');
 }
