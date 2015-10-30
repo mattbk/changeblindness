@@ -116,10 +116,10 @@ switch ($mode) {
 				$columnstoimplode = array("uid", "datetime", "host", "phase", "measure", "value");
 				// Note that backticks (`) go around field names...
 				$columns = "`".implode("`, `", $columnstoimplode)."`";
-				//print_r($columns);
-				$valuestoimplode = array("", "unix_timestamp()", $_SERVER['REMOTE_ADDR'], $phasename, $measure, $measurevalue);
+				// Set up timestamp so you can tell participants apart.  http://alvinalexander.com/php/php-date-formatted-sql-timestamp-insert
+				$timestamp = date('Y-m-d G:i:s');
+				$valuestoimplode = array("", $timestamp, $_SERVER['REMOTE_ADDR'], $phasename, $measure, $measurevalue);
 				$values  = "'".implode("', '", $valuestoimplode)."'";
-				//print_r($values);
 				// Build and execute query 
 				$sql = "INSERT INTO results (";
 				$sql .= $columns;
