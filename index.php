@@ -69,6 +69,10 @@ switch ($mode) {
         $variables['imageWithElement'] = 'img/'.$phase.'-with.png';
         $variables['imageWithoutElement'] = 'img/'.$phase.'-without.png';
         $variables['step_count'] = $index;
+		// Store the participant ID with some simple validation to prevent SQL injection
+		if (isset($_POST['participantid'])) {
+			$_SESSION['participantid'] = preg_replace('/[^A-Za-z0-9\. -]/', '', $_POST['participantid']);
+			}          
         break;
     case 'phase_next':
         $template = 'next.html.twig';
@@ -107,12 +111,16 @@ switch ($mode) {
 		//Building an INSERT query:
 		//Include userid (once collection form is added into the start page)				
 		// DB fields are listed here:
-		$columnstoimplode = array("uid", "datetime", "host", "phase", "xcoordinate", "ycoordinate","responsetime","score");
+		$columnstoimplode = array("uid", "datetime", "host", "participantid","phase", "xcoordinate", "ycoordinate","responsetime","score");
 		// Note that backticks (`) go around field names...
 		$columns = "`".implode("`, `", $columnstoimplode)."`";
 		// Set up timestamp so you can tell participants apart.  http://alvinalexander.com/php/php-date-formatted-sql-timestamp-insert
 		$timestamp = date('Y-m-d G:i:s');
+		// Add the uid placeholder, timestamd, and host/IP
 		$valuestoimplode = array("", $timestamp, $_SERVER['REMOTE_ADDR']);
+		// Add the participant ID
+		array_push($valuestoimplode,$_SESSION['participantid']);
+		// Add the results
 		$valuestoimplode = array_merge($valuestoimplode,$ready);
 		$values  = "'".implode("', '", $valuestoimplode)."'";
 		//print_r($values);
@@ -170,7 +178,7 @@ switch ($mode) {
             $stats = array();
 
 			//Skip empty results (created during debugging)            
-			if ($record['responsetime'] > 0) {
+			if ($record['participantid'] != "") {
 				//Put your results in one array
 				$variables['data'][] = $record;  
 				}
@@ -187,7 +195,6 @@ switch ($mode) {
 
 
 } //End while to loop through results from database.
-
 
 	$results->free();
 	break;    

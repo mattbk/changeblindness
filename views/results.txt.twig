@@ -1,4 +1,4 @@
-uid	datetime	host	phase	xcoordinate	ycoordinate	responsetime	score
+uid	datetime	host	participant	phase	xcoordinate	ycoordinate	responsetime	score
 {% for record in data %}
-{{record.uid}}	{{record.datetime}}	{{record.host}}	{{record.phase}}	{{record.xcoordinate}}	{{record.ycoordinate}}	{{record.responsetime}}	{{record.score}}
+{{record.uid}}	{{record.datetime}}	{{record.host}}	{{record.participantid}}	{{record.phase}}	{{record.xcoordinate}}	{{record.ycoordinate}}	{{record.responsetime}}	{{record.score}}
 {% endfor %}
