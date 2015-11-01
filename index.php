@@ -104,17 +104,33 @@ switch ($mode) {
 		//	as values as well.  Table should have a  field list of: uid, datetime, host, userid, phase, xcoordinate, ycoordinate, responsetime.
 		//	SELECT query should then return one row per userid per phase/scene.	
 		foreach ($_SESSION['results'] as $phasename => $phasevalue) {
+			//Initialize arrays
 			$ready = array();
+			//First piece of $ready is the phase/scene name
 			$ready[] = $phasename;
+			//Loop through xccordinate, ycoordinate, responsetime
 			foreach ($phasevalue as $measure => $measurevalue) {
 				//Put results in the right order for database
 				array_push($ready, $measurevalue);
 				}	
+
+			//Calculate the score.  Compare results with targets in settings.json.
+			if (($phasevalue['xcoordinate'] >= $settings->elementLocations->{$phasename }->topleft->x)
+				&& ($phasevalue['xcoordinate'] < $settings->elementLocations->{$phasename}->bottomright->x)
+				&& ($phasevalue['ycoordinate'] >= $settings->elementLocations->{$phasename}->topleft->y)
+				&& ($phasevalue['ycoordinate'] < $settings->elementLocations->{$phasename}->bottomright->y)) {
+			//Put the correct score in the ready array
+					array_push($ready, '1');
+					}
+				else {
+			//Put the incorrect score in the ready array
+					array_push($ready, '0');
+					}
+				   			
 		//Building an INSERT query:
 		//Include userid (once collection form is added into the start page)				
-		// DB fields: uid, date, host, phase, measure, value
-		// http://php.net/manual/en/function.implode.php
-		$columnstoimplode = array("uid", "datetime", "host", "phase", "xcoordinate", "ycoordinate","responsetime");
+		// DB fields are listed here:
+		$columnstoimplode = array("uid", "datetime", "host", "phase", "xcoordinate", "ycoordinate","responsetime","score");
 		// Note that backticks (`) go around field names...
 		$columns = "`".implode("`, `", $columnstoimplode)."`";
 		// Set up timestamp so you can tell participants apart.  http://alvinalexander.com/php/php-date-formatted-sql-timestamp-insert
@@ -122,7 +138,7 @@ switch ($mode) {
 		$valuestoimplode = array("", $timestamp, $_SERVER['REMOTE_ADDR']);
 		$valuestoimplode = array_merge($valuestoimplode,$ready);
 		$values  = "'".implode("', '", $valuestoimplode)."'";
-		print_r($values);
+		//print_r($values);
 		// Build and execute query 
 		$sql = "INSERT INTO results (";
 		$sql .= $columns;
@@ -131,13 +147,13 @@ switch ($mode) {
 				
 			}
 
-		//Debugging
         $variables['debug'] = $_SESSION['results']; 
         
         break;
     case 'results':
         $download = isset($_GET['download']);
 
+// Check if filtering by local IP should be enabled.
         if ($settings->debug) {
             $variables['allow_filtering'] = true;
             $filtered = isset($_GET['filtered']) || $download;
@@ -155,25 +171,25 @@ switch ($mode) {
             $template = 'results.html.twig';
         }
 
-		// Only shows up when debug=true in settings.json.
         if ($filtered) {
             $variables['filtered'] = true;
-            $results = $db->query("select * from vcd_results where result_host != '192.168.0.1' order by result_date asc");
+          //  $results = $db->query("select * from vcd_results where result_host != '192.168.0.1' order by result_date asc");
+            $results = $db->query("select * from results where host != '192.168.0.1' order by datetime asc");
         }
 
         else {
 //This query needs to be rewritten to use the results table (EAV version), 
 //	but hopefully format the data in the same way (in the query itself, if possible?)	
-            $results = $db->query("select * from vcd_results order by result_date asc");
+            //$results = $db->query("select * from vcd_results order by result_date asc");
+            $results = $db->query("select * from results order by datetime asc");
         }
-
+        
         if ($results === false) {
             header('HTTP/1.0 500 Internal Server Error');
             exit;
-        }
+        	}
 
         $variables['records'] = $results->num_rows;
-
         $variables['data'] = array();
         $variables['stats'] = array();
 
@@ -181,29 +197,47 @@ switch ($mode) {
             $data = array();
             $stats = array();
 
-            // Prepare data
-            foreach ($record as $name => $value) {
-                list($cat, $key) = explode('_', $name);
-                $data[$cat][$key] = $value;
-            }
-            $variables['data'][] = $data;
+			//Skip empty results (created during debugging)            
+			if ($record['responsetime'] > 0) {
+				//Put your results in one array
+				$variables['data'][] = $record;  
+				}
+      		//here 
 
-            // Build statistics
-            foreach ($settings->phases as $phase) {
-                $stats[$phase] = array(
-                    'correct' => (($data[$phase]['xcoordinate'] >= $settings->elementLocations->{$phase}->topleft->x)
-                               && ($data[$phase]['xcoordinate'] <= $settings->elementLocations->{$phase}->bottomright->x)
-                               && ($data[$phase]['ycoordinate'] >= $settings->elementLocations->{$phase}->topleft->y)
-                               && ($data[$phase]['ycoordinate'] <= $settings->elementLocations->{$phase}->bottomright->y)),
-                    'time' => $data[$phase]['responsetime']
-                );
-            }
-            $variables['stats'][] = $stats;
+
+      		
+		//Skip empty results (created during debugging)
+		if ($record['responsetime'] > 0) {
+            foreach ($record as $name => $value) {
+    
+            }    
         }
 
-        $results->free();
-        break;
-}
+
+} //End while to loop through results from database.
+
+  	echo "<pre>";
+	   print_r($variables['data']);
+    echo "</pre>";  
+
+// Build statistics
+//Stats are calculated before results are put into the database
+//             foreach ($variables['data'] as $key=>$value) {
+//             //print_r($value['phase']);
+//                 $stats[] = array(
+//                     'correct' => (($value['xcoordinate'] >= $settings->elementLocations->{$value['phase'] }->topleft->x)
+//                                && ($value['xcoordinate'] < $settings->elementLocations->{$value['phase']}->bottomright->x)
+//                                && ($value['ycoordinate'] >= $settings->elementLocations->{$value['phase']}->topleft->y)
+//                                && ($value['ycoordinate'] < $settings->elementLocations->{$value['phase']}->bottomright->y)),
+//                     'time' => $value['responsetime']
+//                 );
+//             }
+//             $variables['stats'] = $stats;
+
+	$results->free();
+	break;    
+} //End case to select page.
+
 
 if (!empty ($template)) {
     echo $twig->render($template, $variables);
