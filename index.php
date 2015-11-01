@@ -78,6 +78,7 @@ switch ($mode) {
     case 'finish':
         $template = 'finish.html.twig';
         // Store the result.
+// This section will be removed		
         $query = $db->prepare('insert into vcd_results values (null, unix_timestamp(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
         $query->bind_param(
             'siiiiiiiii',
@@ -94,10 +95,65 @@ switch ($mode) {
         ) or die('Could not prepare query');
         $query->execute() or die('Could not execute query:<br>'.mysqli_error($db));
         $query->close();
+ // End remove section
+ 
+		//Store the result.
+		//Loop through $results better
+		//This will allow running only one query rather than several: http://stackoverflow.com/a/10054657/2152245
+		//Because I have `phase` as a field, I can also have `xcoordinate`, `ycoordinate`, and `responsetime`
+		//	as values as well.  Table should have a  field list of: uid, datetime, host, userid, phase, xcoordinate, ycoordinate, responsetime.
+		//	SELECT query should then return one row per userid per phase/scene.	
+		foreach ($_SESSION['results'] as $phasename => $phasevalue) {
+			//Initialize arrays
+			$ready = array();
+			//First piece of $ready is the phase/scene name
+			$ready[] = $phasename;
+			//Loop through xccordinate, ycoordinate, responsetime
+			foreach ($phasevalue as $measure => $measurevalue) {
+				//Put results in the right order for database
+				array_push($ready, $measurevalue);
+				}	
+
+			//Calculate the score.  Compare results with targets in settings.json.
+			if (($phasevalue['xcoordinate'] >= $settings->elementLocations->{$phasename }->topleft->x)
+				&& ($phasevalue['xcoordinate'] < $settings->elementLocations->{$phasename}->bottomright->x)
+				&& ($phasevalue['ycoordinate'] >= $settings->elementLocations->{$phasename}->topleft->y)
+				&& ($phasevalue['ycoordinate'] < $settings->elementLocations->{$phasename}->bottomright->y)) {
+			//Put the correct score in the ready array
+					array_push($ready, '1');
+					}
+				else {
+			//Put the incorrect score in the ready array
+					array_push($ready, '0');
+					}
+				   			
+		//Building an INSERT query:
+		//Include userid (once collection form is added into the start page)				
+		// DB fields are listed here:
+		$columnstoimplode = array("uid", "datetime", "host", "phase", "xcoordinate", "ycoordinate","responsetime","score");
+		// Note that backticks (`) go around field names...
+		$columns = "`".implode("`, `", $columnstoimplode)."`";
+		// Set up timestamp so you can tell participants apart.  http://alvinalexander.com/php/php-date-formatted-sql-timestamp-insert
+		$timestamp = date('Y-m-d G:i:s');
+		$valuestoimplode = array("", $timestamp, $_SERVER['REMOTE_ADDR']);
+		$valuestoimplode = array_merge($valuestoimplode,$ready);
+		$values  = "'".implode("', '", $valuestoimplode)."'";
+		//print_r($values);
+		// Build and execute query 
+		$sql = "INSERT INTO results (";
+		$sql .= $columns;
+		$sql .= ") VALUES ($values)";
+		$db->query($sql) or die('Could not execute query:<br>'.mysqli_error($db));	
+				
+			}
+
+        $variables['debug'] = $_SESSION['results']; 
+        
         break;
     case 'results':
         $download = isset($_GET['download']);
 
+// Check if filtering by local IP should be enabled.
         if ($settings->debug) {
             $variables['allow_filtering'] = true;
             $filtered = isset($_GET['filtered']) || $download;
@@ -108,7 +164,7 @@ switch ($mode) {
 
         if ($download) {
             header('Content-Type: text/tab-separated-values');
-            header('Content-Disposition: attachment; filename=vcd-results.txt');
+            header('Content-Disposition: attachment; filename="results.txt"');
             $template = 'results.txt.twig';
         }
         else {
@@ -117,19 +173,18 @@ switch ($mode) {
 
         if ($filtered) {
             $variables['filtered'] = true;
-            $results = $db->query("select * from vcd_results where result_host != '192.168.0.1' order by result_date asc");
-        }
+            $results = $db->query("select * from results where host != '192.168.0.1' order by datetime asc");
+        	}
         else {
-            $results = $db->query("select * from vcd_results order by result_date asc");
-        }
-
+            $results = $db->query("select * from results order by datetime asc");
+        	}
+        
         if ($results === false) {
             header('HTTP/1.0 500 Internal Server Error');
             exit;
-        }
+        	}
 
         $variables['records'] = $results->num_rows;
-
         $variables['data'] = array();
         $variables['stats'] = array();
 
@@ -137,33 +192,34 @@ switch ($mode) {
             $data = array();
             $stats = array();
 
-            // Prepare data
-            foreach ($record as $name => $value) {
-                list($cat, $key) = explode('_', $name);
-                $data[$cat][$key] = $value;
-            }
-            $variables['data'][] = $data;
+			//Skip empty results (created during debugging)            
+			if ($record['responsetime'] > 0) {
+				//Put your results in one array
+				$variables['data'][] = $record;  
+				}
+      		//here 
 
-            // Build statistics
-            foreach ($settings->phases as $phase) {
-                $stats[$phase] = array(
-                    'correct' => (($data[$phase]['xcoordinate'] >= $settings->elementLocations->{$phase}->topleft->x)
-                               && ($data[$phase]['xcoordinate'] <= $settings->elementLocations->{$phase}->bottomright->x)
-                               && ($data[$phase]['ycoordinate'] >= $settings->elementLocations->{$phase}->topleft->y)
-                               && ($data[$phase]['ycoordinate'] <= $settings->elementLocations->{$phase}->bottomright->y)),
-                    'time' => $data[$phase]['responsetime']
-                );
-            }
-            $variables['stats'][] = $stats;
+
+      		
+		//Skip empty results (created during debugging)
+		if ($record['responsetime'] > 0) {
+            foreach ($record as $name => $value) {
+    
+            }    
         }
 
-        $results->free();
-        break;
-}
+
+} //End while to loop through results from database.
+
+
+	$results->free();
+	break;    
+} //End case to select page.
+
 
 if (!empty ($template)) {
     echo $twig->render($template, $variables);
 }
 else {
-    //header('HTTP/1.0 404 Not Found');
+    header('HTTP/1.0 404 Not Found');
 }
