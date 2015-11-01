@@ -164,7 +164,7 @@ switch ($mode) {
 
         if ($download) {
             header('Content-Type: text/tab-separated-values');
-            header('Content-Disposition: attachment; filename=vcd-results.txt');
+            header('Content-Disposition: attachment; filename="results.txt"');
             $template = 'results.txt.twig';
         }
         else {
@@ -173,16 +173,11 @@ switch ($mode) {
 
         if ($filtered) {
             $variables['filtered'] = true;
-          //  $results = $db->query("select * from vcd_results where result_host != '192.168.0.1' order by result_date asc");
             $results = $db->query("select * from results where host != '192.168.0.1' order by datetime asc");
-        }
-
+        	}
         else {
-//This query needs to be rewritten to use the results table (EAV version), 
-//	but hopefully format the data in the same way (in the query itself, if possible?)	
-            //$results = $db->query("select * from vcd_results order by result_date asc");
             $results = $db->query("select * from results order by datetime asc");
-        }
+        	}
         
         if ($results === false) {
             header('HTTP/1.0 500 Internal Server Error');
@@ -216,23 +211,6 @@ switch ($mode) {
 
 } //End while to loop through results from database.
 
-  	echo "<pre>";
-	   print_r($variables['data']);
-    echo "</pre>";  
-
-// Build statistics
-//Stats are calculated before results are put into the database
-//             foreach ($variables['data'] as $key=>$value) {
-//             //print_r($value['phase']);
-//                 $stats[] = array(
-//                     'correct' => (($value['xcoordinate'] >= $settings->elementLocations->{$value['phase'] }->topleft->x)
-//                                && ($value['xcoordinate'] < $settings->elementLocations->{$value['phase']}->bottomright->x)
-//                                && ($value['ycoordinate'] >= $settings->elementLocations->{$value['phase']}->topleft->y)
-//                                && ($value['ycoordinate'] < $settings->elementLocations->{$value['phase']}->bottomright->y)),
-//                     'time' => $value['responsetime']
-//                 );
-//             }
-//             $variables['stats'] = $stats;
 
 	$results->free();
 	break;    
