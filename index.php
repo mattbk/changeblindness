@@ -78,30 +78,7 @@ switch ($mode) {
     case 'finish':
         $template = 'finish.html.twig';
         // Store the result.
-// This section will be removed		
-        $query = $db->prepare('insert into vcd_results values (null, unix_timestamp(), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-        $query->bind_param(
-            'siiiiiiiii',
-            $_SERVER['REMOTE_ADDR'],
-            $_SESSION['results']['scene1']['xcoordinate'],
-            $_SESSION['results']['scene1']['ycoordinate'],
-            $_SESSION['results']['scene1']['responsetime'],
-            $_SESSION['results']['scene2']['xcoordinate'],
-            $_SESSION['results']['scene2']['ycoordinate'],
-            $_SESSION['results']['scene2']['responsetime'],
-            $_SESSION['results']['scene3']['xcoordinate'],
-            $_SESSION['results']['scene3']['ycoordinate'],
-            $_SESSION['results']['scene3']['responsetime']
-        ) or die('Could not prepare query');
-        $query->execute() or die('Could not execute query:<br>'.mysqli_error($db));
-        $query->close();
- // End remove section
- 
-		//Store the result.
 		//Loop through $results better
-		//This will allow running only one query rather than several: http://stackoverflow.com/a/10054657/2152245
-		//Because I have `phase` as a field, I can also have `xcoordinate`, `ycoordinate`, and `responsetime`
-		//	as values as well.  Table should have a  field list of: uid, datetime, host, userid, phase, xcoordinate, ycoordinate, responsetime.
 		//	SELECT query should then return one row per userid per phase/scene.	
 		foreach ($_SESSION['results'] as $phasename => $phasevalue) {
 			//Initialize arrays
