@@ -6,12 +6,14 @@ body {
     //background: #dddddd;
 	background: #ffffff;
 	// 90vh is 90% of viewer height: http://stackoverflow.com/a/16837667/2152245
-    height:90vh;;
+    height:80vh;
     overflow: hidden;
     cursor: pointer;
 }
 
 #rotator img {
     display: block;
+    max-height:80vh;	
+	width:auto;
     margin: 0;
 }
