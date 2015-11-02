@@ -125,7 +125,8 @@ switch ($mode) {
 		$values  = "'".implode("', '", $valuestoimplode)."'";
 		//print_r($values);
 		// Build and execute query 
-		$sql = "INSERT INTO results (";
+		//tablename
+		$sql = "INSERT INTO ".$settings->database->table." (";
 		$sql .= $columns;
 		$sql .= ") VALUES ($values)";
 		$db->query($sql) or die('Could not execute query:<br>'.mysqli_error($db));	
@@ -158,10 +159,12 @@ switch ($mode) {
 
         if ($filtered) {
             $variables['filtered'] = true;
-            $results = $db->query("select * from results where host != '192.168.0.1' order by datetime asc");
+            //tablename
+            $results = $db->query("select * from ".$settings->database->table." where host != '192.168.0.1' order by datetime asc");
         	}
         else {
-            $results = $db->query("select * from results order by datetime asc");
+        	//tablename
+            $results = $db->query("select * from ".$settings->database->table." order by datetime asc");
         	}
         
         if ($results === false) {
