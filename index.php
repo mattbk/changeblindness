@@ -66,9 +66,10 @@ switch ($mode) {
         break;
     case 'phase':
         $template = 'change.html.twig';
-        $variables['imageWithElement'] = 'img/'.$phase.'-with.png';
-        $variables['imageWithoutElement'] = 'img/'.$phase.'-without.png';
+        $variables['imageWithElement'] = 'img/'.$phase.'-with.jpg';
+        $variables['imageWithoutElement'] = 'img/'.$phase.'-without.jpg';
         $variables['step_count'] = $index;
+		$variables['step_total'] = count($settings->phases);
 		// Store the participant ID with some simple validation to prevent SQL injection
 		if (isset($_POST['participantid'])) {
 			$_SESSION['participantid'] = preg_replace('/[^A-Za-z0-9\. -]/', '', $_POST['participantid']);
