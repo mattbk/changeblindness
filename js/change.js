@@ -1,6 +1,6 @@
 // Script settings.
-var slideDuration = 500;
-var blankDuration = 200;
+var slideDuration = 600;
+var blankDuration = 400;
 
 // Script internals.
 var $currentSlide;
