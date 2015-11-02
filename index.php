@@ -30,6 +30,18 @@ $variables = array(
     'baseURL' => $settings->baseURL
 );
 
+//Pull targets from CSV file
+if (($handle = fopen('targets.csv', 'r')) === false) {
+    die('Error opening file');
+	}
+$headers = fgetcsv($handle, 1024, ',');
+$targets = array();
+while ($row = fgetcsv($handle, 1024, ',')) {
+    $targets[$row[0]] = array_combine($headers, $row);
+	}
+fclose($handle);
+
+
 $template = false;
 $mode = !empty($_GET['mode']) ? $_GET['mode'] : 'start';
 $phase = !empty($_GET['phase']) && in_array($_GET['phase'], $settings->phases) ? $_GET['phase'] : false;
@@ -97,18 +109,17 @@ switch ($mode) {
 				}	
 
 			//Calculate the score.  Compare results with targets in settings.json.
-			if (($phasevalue['xcoordinate'] >= $settings->elementLocations->{$phasename }->topleft->x)
-				&& ($phasevalue['xcoordinate'] < $settings->elementLocations->{$phasename}->bottomright->x)
-				&& ($phasevalue['ycoordinate'] >= $settings->elementLocations->{$phasename}->topleft->y)
-				&& ($phasevalue['ycoordinate'] < $settings->elementLocations->{$phasename}->bottomright->y)) {
+			if (($phasevalue['xcoordinate'] >= $targets[$phasename][topleftx])
+				&& ($phasevalue['xcoordinate'] < $targets[$phasename][bottomrightx])
+				&& ($phasevalue['ycoordinate'] >= $targets[$phasename][toplefty])
+				&& ($phasevalue['ycoordinate'] < $targets[$phasename][bottomrighty])) {		
 			//Put the correct score in the ready array
 					array_push($ready, '1');
 					}
 				else {
 			//Put the incorrect score in the ready array
 					array_push($ready, '0');
-					}
-				   			
+					}   			
 		//Building an INSERT query:
 		//Include userid (once collection form is added into the start page)				
 		// DB fields are listed here:
