@@ -3,7 +3,8 @@
         "host":     "localhost",
         "username": "user",
         "password": "pass",
-        "name":     "db"
+        "name":     "db",
+        "table":	"results"
     },
     "phases": [
         "notable",
