@@ -3,9 +3,10 @@ body {
 }
 
 #rotator {
-    background: #dddddd;
-    width: 960px;
-    height: 627px;
+    //background: #dddddd;
+	background: #ffffff;
+	// 90vh is 90% of viewer height: http://stackoverflow.com/a/16837667/2152245
+    height:90vh;;
     overflow: hidden;
     cursor: pointer;
 }
