@@ -18,6 +18,8 @@ session_start();
 $base_dir = dirname(__FILE__);
 
 $settings = json_decode(file_get_contents('settings.json'));
+//Set timezone
+date_default_timezone_set ($settings->timezone);
 
 $db = new mysqli($settings->database->host, $settings->database->username, $settings->database->password, $settings->database->name);
 
