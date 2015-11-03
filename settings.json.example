@@ -13,5 +13,6 @@
     ],
     "baseURL": "/",
     "debug": false,
-	"timezone": "America/Chicago"
+	"timezone": "America/Chicago",
+	"filetype": "jpg"
 }
