@@ -75,6 +75,7 @@ switch ($mode) {
     case 'start':
         $template = 'index.html.twig';
         $variables['start_url'] = 'index.php?mode=phase&phase='.$settings->phases[$index];
+		unset($_SESSION['results']);
         break;
     case 'phase':
         $template = 'change.html.twig';
@@ -90,6 +91,7 @@ switch ($mode) {
     case 'phase_next':
         $template = 'next.html.twig';
         $variables['next_url'] = 'index.php?mode=phase&phase='.$settings->phases[$index];
+		$variables['prev_url'] = 'index.php?mode=phase&phase='.$settings->phases[$index-1];
         $variables['step_count'] = $index;
         break;
     case 'finish':
