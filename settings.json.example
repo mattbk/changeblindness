@@ -12,5 +12,6 @@
         "renoted"
     ],
     "baseURL": "/",
-    "debug": false
+    "debug": false,
+	"timezone": "America/Chicago"
 }
