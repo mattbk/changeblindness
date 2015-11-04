@@ -176,11 +176,11 @@ switch ($mode) {
         if ($filtered) {
             $variables['filtered'] = true;
             //tablename
-            $results = $db->query("select * from ".$settings->database->table." where host != '192.168.0.1' order by datetime asc");
+            $results = $db->query("select * from ".$settings->database->table." where host != '192.168.0.1' order by datetime asc, participantid asc, phase asc");
         	}
         else {
         	//tablename
-            $results = $db->query("select * from ".$settings->database->table." order by datetime asc");
+            $results = $db->query("select * from ".$settings->database->table." order by datetime asc, participantid asc, phase asc");
         	}
         
         if ($results === false) {
