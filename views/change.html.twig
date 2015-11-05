@@ -7,10 +7,14 @@
     <div id="placeholder" class="well">
         <p>Please wait while the images are loaded.</p>
     </div>
+	<div id="outside">
+		<!-- This hidden image keeps the div open and the right size, even when #rotator is hidden in change.js. -->
+		<img src="{{ imageWithElement}}" style="visibility:hidden; position:relative;">
     <div id="rotator" class="hide">
         <img src="{{ imageWithElement}}">
         <img src="{{ imageWithoutElement}}">
     </div>
+	</div>
     <form method="post" action="" name="changeform" id="changeform">
         <input type="hidden" name="xcoordinate" id="xcoordinate" value="0">
         <input type="hidden" name="ycoordinate" id="ycoordinate" value="0">

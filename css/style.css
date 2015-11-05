@@ -2,13 +2,23 @@ body {
     padding-top: 40px;
 }
 
+#outside {
+    cursor: pointer;
+	z-index:10; 
+	position:relative;
+}
+
 #rotator {
-    //background: #dddddd;
 	background: #ffffff;
 	// 90vh is 90% of viewer height: http://stackoverflow.com/a/16837667/2152245
     height:80vh;
-    overflow: hidden;
+	width:auto;
+    //overflow: hidden;
     cursor: pointer;
+	z-index:0; 
+	position: absolute;
+    left: 0px;
+    top: 0px;
 }
 
 #rotator img {
