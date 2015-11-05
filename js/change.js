@@ -1,6 +1,6 @@
 // Script settings.
-var slideDuration = 500;
-var blankDuration = 200;
+var slideDuration = 600;
+var blankDuration = 400;
 
 // Script internals.
 var $currentSlide;
@@ -22,7 +22,7 @@ $(document).ready(function(){
 
     startTime = d1.getTime();
 
-    $('#rotator').mousedown(function(event){
+    $('#outside').mousedown(function(event){
         document.getElementById('xcoordinate').value = event.pageX - this.offsetLeft;
         document.getElementById('ycoordinate').value = event.pageY - this.offsetTop;
         var d2 = new Date(); var endTime = d2.getTime();
